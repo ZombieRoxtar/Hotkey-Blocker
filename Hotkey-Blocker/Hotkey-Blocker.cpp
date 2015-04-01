@@ -7,7 +7,7 @@
 using namespace std;
 
 /* This is our message callback */
-LRESULT CALLBACK  WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int main()
 {
@@ -16,18 +16,18 @@ int main()
     memset(&wc, 0, sizeof(wc));
     wc.cbSize = sizeof(wc);
     wc.lpfnWndProc = WndProc;
-    wc.lpszClassName = TEXT("MessageWindowClass");
+    wc.lpszClassName = "MessageWindowClass";
     RegisterClassEx(&wc);
 
     /* Create window (uses HWND_MESSAGE as the parent window to create message only window) */
-    HWND window = CreateWindow(LPCWSTR(wc.lpszClassName), LPCWSTR("HotkeyMesageWindow"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+    HWND window = CreateWindow(wc.lpszClassName, "HotkeyMesageWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
     if(!window)
     {
         cerr<< "Can't create a window for messaging!" <<endl;
         exit(1);
     }
 
-	SetConsoleTitle(TEXT("Hotkey Blocker"));
+	SetConsoleTitle("Hotkey Blocker");
 	bool keepGoing = true;
 
 	int cappedKeys[] =
@@ -38,7 +38,7 @@ int main()
 		VK_F3,
 		VK_F4
 	};
-	const static int arraySize = sizeof(cappedKeys) / sizeof(int);
+	const static auto arraySize = sizeof(cappedKeys) / sizeof(int);
 	printf( "To exit press Num Pad Divide.\n" ); /* Why doesn't this key get passed? */
 
 	bool errorKey = false;
@@ -55,23 +55,23 @@ int main()
 
 	/* Main message loop */
 	MSG msg = {0};
-	while (( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 ) || keepGoing )
+	while ( keepGoing )
 	{
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-		if (msg.message == WM_HOTKEY)
-        {
-			int daKey = msg.wParam;
-			if (daKey == 0 )
-				keepGoing = false;
-			HWND h = GetForegroundWindow();
-			PostMessage( h, WM_KEYDOWN, cappedKeys[daKey], 0 );
-			PostMessage( h, WM_KEYUP, cappedKeys[daKey], 0 );
-			/*
-				I really couldn't care about PostMessage vs Send Message,
-				but I want to be sure both messages are received and in that order.
-			*/
-        }
+        if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 )
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+			if (msg.message == WM_HOTKEY)
+			{
+				int daKey = msg.wParam;
+				if (daKey == 0 )
+					keepGoing = false;
+				HWND h = GetForegroundWindow();
+				PostMessage( h, WM_KEYDOWN, cappedKeys[daKey], 0 );
+				PostMessage( h, WM_KEYUP, cappedKeys[daKey], 0 );
+			}
+		}
+		Sleep(10);
 	}
     return msg.wParam;
 }

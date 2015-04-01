@@ -4,10 +4,30 @@
 
 #include <iostream>
 #include <windows.h>
+using namespace std;
+
+/* This is our message callback */
+LRESULT CALLBACK  WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int main()
 {
-	SetConsoleTitle( TEXT( "Hotkey Blocker" ));
+	/* Create window class */
+    WNDCLASSEX wc;
+    memset(&wc, 0, sizeof(wc));
+    wc.cbSize = sizeof(wc);
+    wc.lpfnWndProc = WndProc;
+    wc.lpszClassName = TEXT("MessageWindowClass");
+    RegisterClassEx(&wc);
+
+    /* Create window (uses HWND_MESSAGE as the parent window to create message only window) */
+    HWND window = CreateWindow(LPCWSTR(wc.lpszClassName), LPCWSTR("HotkeyMesageWindow"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+    if(!window)
+    {
+        cerr<< "Can't create a window for messaging!" <<endl;
+        exit(1);
+    }
+
+	SetConsoleTitle(TEXT("Hotkey Blocker"));
 	bool keepGoing = true;
 
 	int cappedKeys[] =
@@ -19,7 +39,7 @@ int main()
 		VK_F4
 	};
 	const static int arraySize = sizeof(cappedKeys) / sizeof(int);
-	printf( "To exit press Num Pad Divide.\n" ); /* Why doesn't this get passed? */
+	printf( "To exit press Num Pad Divide.\n" ); /* Why doesn't this key get passed? */
 
 	bool errorKey = false;
 	for( int i = 0; i < arraySize; i++ )
@@ -33,6 +53,7 @@ int main()
 	if( !errorKey )
 		printf( "Ready to rock and roll!\n" );
 
+	/* Main message loop */
 	MSG msg = {0};
 	while (( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 ) || keepGoing )
 	{

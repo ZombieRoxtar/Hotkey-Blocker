@@ -2,10 +2,10 @@
 	This program was written by Chris Roxby
 */
 
-#include <stdio.h>
-#include "Windows.h"
+#include <iostream>
+#include <windows.h>
 
-void main()
+int main()
 {
 	SetConsoleTitle( TEXT( "Hotkey Blocker" ));
 	bool keepGoing = true;
@@ -18,11 +18,11 @@ void main()
 		VK_F3,
 		VK_F4
 	};
-	int arraySize = sizeof(cappedKeys) / sizeof(int); /* I thought a managed array would make the program easier to edit later? */
-	printf( "To exit press Num Pad Divide twice.\n" ); /* Why do I need press this one twice? */
+	const static int arraySize = sizeof(cappedKeys) / sizeof(int);
+	printf( "To exit press Num Pad Divide.\n" ); /* Why doesn't this get passed? */
 
 	bool errorKey = false;
-	for (int i = 0; i < arraySize; i++)
+	for( int i = 0; i < arraySize; i++ )
 	{
 		if ( !RegisterHotKey( NULL, i, !MOD_ALT, cappedKeys[i] )) /* ALT is only ignored here b/c of F4 */
 		{
@@ -30,41 +30,40 @@ void main()
 			printf( "Something went wrong with hotkey #%d!\n", i );
 		}
 	}
-	if( !errorKey)
-	{
+	if( !errorKey )
 		printf( "Ready to rock and roll!\n" );
-	}
 
 	MSG msg = {0};
-	do
+	while (( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 ) || keepGoing )
 	{
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
 		if (msg.message == WM_HOTKEY)
         {
-			int daKey = 0;
-			switch (msg.wParam)
-			{
-			case 0:
+			int daKey = msg.wParam;
+			if (daKey == 0 )
 				keepGoing = false;
-				break;
-			case 1:
-				daKey = 1;
-				break;
-			case 2:
-				daKey = 2;
-				break;
-			case 3:
-				daKey = 3;
-				break;
-			case 4:
-				daKey = 4;
-			}
-				HWND h = GetForegroundWindow();
-				PostMessage( h, WM_KEYDOWN, cappedKeys[daKey], 0 );
-				PostMessage( h, WM_KEYUP, cappedKeys[daKey], 0 );
-				/*
-					I really couldn't care about PostMessage vs Send Message,
-					but I want to be sure both messages are received and in that order.
-				*/
+			HWND h = GetForegroundWindow();
+			PostMessage( h, WM_KEYDOWN, cappedKeys[daKey], 0 );
+			PostMessage( h, WM_KEYUP, cappedKeys[daKey], 0 );
+			/*
+				I really couldn't care about PostMessage vs Send Message,
+				but I want to be sure both messages are received and in that order.
+			*/
         }
-	} while (( GetMessage(&msg, NULL, 0, 0) != 0 ) && keepGoing );
+	}
+    return msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }

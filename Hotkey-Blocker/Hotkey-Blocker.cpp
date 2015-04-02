@@ -15,13 +15,15 @@ int cappedKeys[] =
         VK_F3,
         VK_F4
 };
-const static auto arraySize = sizeof(cappedKeys) / sizeof(int);
 
 /* This is our message callback */
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int main()
 {
+	bool errorKey = false;
+	const static auto arraySize = sizeof(cappedKeys) / sizeof(int);
+
 	/* Create window class */
     WNDCLASSEX wc;
     memset(&wc, 0, sizeof(wc));
@@ -41,28 +43,27 @@ int main()
 	SetConsoleTitle("Hotkey Blocker");
 	printf( "To exit press Num Pad Divide.\n" ); /* Why doesn't this key get passed? */
 
-	bool errorKey = false;
 	for( int i = 0; i < arraySize; i++ )
 	{
 		if ( !RegisterHotKey( NULL, i, !MOD_ALT, cappedKeys[i] )) /* ALT is only ignored here b/c of F4 */
 		{
 			errorKey = true;
 			printf( "Something went wrong with hotkey #%d!\n", i );
-                        /* Why not terminate the program here? */
+			/* We'll keep going so we use the keys that aren't broken. */
 		}
 	}
 	if( !errorKey )
 		printf( "Ready to rock and roll!\n" );
 
-	/* Main message loop */
+	/* Main Loop */
 	MSG msg;
 	do
 	{
-            if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 )
-            {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
+		if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) != 0 )
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg); /* This gets the message to WndProc() */
+		}
 	    Sleep(10);
 	}while(keepGoing);
     return msg.wParam;
@@ -70,18 +71,17 @@ int main()
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    int daKey;
+    int daKey = wParam;
     HWND fgWindow;
 
     switch (message)
     {
     case WM_HOTKEY:
-        daKey = msg.wParam;
         if (daKey == 0 )
-                keepGoing = false;
+                keepGoing = false; /* Can we just set this =daKey ? */
         fgWindow = GetForegroundWindow();
-        PostMessage( h, WM_KEYDOWN, cappedKeys[daKey], 0 );
-        PostMessage( h, WM_KEYUP, cappedKeys[daKey], 0 );
+        PostMessage( fgWindow, WM_KEYDOWN, cappedKeys[daKey], 0 );
+        PostMessage( fgWindow, WM_KEYUP  , cappedKeys[daKey], 0 );
         break;
     case WM_DESTROY:
         PostQuitMessage(0);

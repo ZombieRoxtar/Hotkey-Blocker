@@ -20,8 +20,8 @@ int main()
     RegisterClassEx(&wc);
 
     /* Create window (uses HWND_MESSAGE as the parent window to create message only window) */
-    HWND window = CreateWindow(wc.lpszClassName, "HotkeyMesageWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
-    if(!window)
+    HWND messageWindow = CreateWindow(wc.lpszClassName, "HotkeyMesageWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL);
+    if(!messageWindow)
     {
         cerr<< "Can't create a window for messaging!" <<endl;
         exit(1);

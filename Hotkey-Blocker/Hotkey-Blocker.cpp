@@ -55,7 +55,7 @@ int main()
 
 	/* Main message loop */
 	MSG msg = {0};
-	while ( keepGoing )
+	do
 	{
         if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 )
 		{
@@ -72,7 +72,7 @@ int main()
 			}
 		}
 		Sleep(10);
-	}
+	}while(keepGoing);
     return msg.wParam;
 }
 

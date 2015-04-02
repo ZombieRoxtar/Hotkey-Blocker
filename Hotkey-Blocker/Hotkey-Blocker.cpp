@@ -45,7 +45,7 @@ int main()
 
 	for( int i = 0; i < arraySize; i++ )
 	{
-		if ( !RegisterHotKey( NULL, i, !MOD_ALT, cappedKeys[i] )) /* ALT is only ignored here b/c of F4 */
+		if ( !RegisterHotKey( messageWindow, i, !MOD_ALT, cappedKeys[i] )) /* ALT is only ignored here b/c of F4 */
 		{
 			errorKey = true;
 			printf( "Something went wrong with hotkey #%d!\n", i );
@@ -77,7 +77,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_HOTKEY:
-    	daKey = (int)wParam;
         if (daKey == 0 )
                 keepGoing = false; /* Can we just set this =daKey ? */
         fgWindow = GetForegroundWindow();

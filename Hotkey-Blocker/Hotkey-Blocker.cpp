@@ -77,6 +77,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_HOTKEY:
+    	daKey = (int)wParam;
         if (daKey == 0 )
                 keepGoing = false; /* Can we just set this =daKey ? */
         fgWindow = GetForegroundWindow();

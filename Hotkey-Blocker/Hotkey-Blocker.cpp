@@ -59,7 +59,7 @@ int main()
 	MSG msg;
 	do
 	{
-		if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) != 0 )
+		if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) != 0 )
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg); /* This gets the message to WndProc() */

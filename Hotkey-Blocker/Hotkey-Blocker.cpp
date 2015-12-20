@@ -79,7 +79,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_HOTKEY:
         if (daKey == 0 )
         {
-                keepGoing = false;
+			keepGoing = false;
         }
         fgWindow = GetForegroundWindow();
         PostMessage( fgWindow, WM_KEYDOWN, cappedKeys[daKey], 0 );
